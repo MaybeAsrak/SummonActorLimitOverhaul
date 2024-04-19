@@ -8,7 +8,7 @@ cmake_minimum_required(VERSION 3.21)
 
 # [BEGIN set_project_name]
 # Set your project name. This will be the name of your SKSE .dll file.
-project(SlowTimeUnbound VERSION 0.1.0 LANGUAGES CXX)
+project(SummonActorLimitOverhaul VERSION 1.0 LANGUAGES CXX)
 
 # [END set_project_name]
 
@@ -73,7 +73,7 @@ if(DEFINED OUTPUT_FOLDER)
     )
 
     # If you perform a "Debug" build, also copy .pdb file (for debug symbols)
-    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    if(CMAKE_BUILD_TYPE STREQUAL "RELWITHDEBINFO")
         add_custom_command(
             TARGET "${PROJECT_NAME}"
             POST_BUILD
