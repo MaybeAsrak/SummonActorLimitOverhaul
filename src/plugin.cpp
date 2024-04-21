@@ -5,7 +5,6 @@
 struct Hooks {
     struct CommandedActorLimitHook {
         static void thunk(RE::PerkEntryPoint entry_point, RE::Actor* target, RE::MagicItem* a_spell, void* out) {
-  
             float* floatPtr = static_cast<float*>(out);
             *floatPtr = 999.0f;  // If you need more than 999 summons, I think you've got a problem
 
@@ -26,13 +25,13 @@ struct Hooks {
             std::vector<int> indexarrayworking2untyped;
             std::vector<float> indexarrayworkingfloatuntyped;
 
-           
             float perkfactor = 0.0f;
             int j = 0;
             int n = 0;
             int reanimated = 0;
             int accountedfor = 0;
-            if (a_AE) {
+            if (a_AE && test->middleHigh->perkData) {  
+
                 auto akCastedMagic = a_AE->spell;
                 RE::SummonCreatureEffect* summonedeffect;
                 RE::ReanimateEffect* reanimatedeffect;
@@ -73,6 +72,7 @@ struct Hooks {
                 
                 keywordmap["untyped"] = perkfactor;
                 for (auto& elements : mid) {
+
                     indexarrayworking.push_back(j);
                     indexarrayworkingfloat.push_back(mid[j].activeEffect->elapsedSeconds);
                     j += 1;
@@ -99,11 +99,14 @@ struct Hooks {
                                 auto testkey =
                                     element.activeEffect->effect->baseEffect->keywords[idx]->formEditorID.c_str();
                                 if (!keywordmap.contains(testkey)) {
+
+                                        
                                     perkfactor = 0.0f;
                                     RE::HandleEntryPoint(RE::PerkEntryPoint::kModSpellCost, summoner, &perkfactor, element.activeEffect->effect->baseEffect->keywords[idx]->formEditorID.c_str(), 3, {element.activeEffect->spell});
                                         keywordmap[testkey] = perkfactor;
                                 }
                                 if (keywordmap[testkey] >= 1.0f && accountedfor == 0) {
+
                                         keywordmap[testkey] -= 1.0f;
                                         accountedfor = 1;
                                 }
@@ -128,6 +131,7 @@ struct Hooks {
 
                 if (indexarray.size() > 0) {
                         for (std::uint32_t widx = 0; widx < indexarray.size(); ++widx) {
+
                             mid[indexarray[widx]].activeEffect->Dispel(true);
                         }
                 }
@@ -179,8 +183,10 @@ struct Hooks {
     };
 };
 
+
 SKSEPluginLoad(const SKSE::LoadInterface* skse) {
     SKSE::Init(skse);
     Hooks::Install();
     return true;
 }
+
