@@ -73,9 +73,11 @@ struct Hooks {
                 RE::HandleEntryPoint(RE::PerkEntryPoint::kModSpellCost, summoner, &perkfactorcapped,
                                      "VanillaCapped", 3,
                                      {akCastedMagic});
-                if (perkfactor >= 1.0f && perkfactor + perkfactorcapped < 1.0f) {
+                if (perkfactor >= 1.0f && (perkfactor + perkfactorcapped < 1.0f)) {
                 
                     perkfactor = 1.0f;
+                } else {
+                    perkfactor += perkfactorcapped;
                 }
                 keywordmap["untyped"] = perkfactor;
                 for (auto& elements : mid) {
