@@ -73,17 +73,32 @@ struct Hooks {
                 RE::HandleEntryPoint(RE::PerkEntryPoint::kModSpellCost, summoner, &perkfactorcapped,
                                      "VanillaCapped", 3,
                                      {akCastedMagic});
+                float reanimatedbonus = 0.0f;
+                float nonreanimatedbonus = 0.0f;
+                RE::HandleEntryPoint(RE::PerkEntryPoint::kModSpellCost, summoner, &reanimatedbonus, "VanillaCapped", 4,
+                                     {akCastedMagic});
+
+                RE::HandleEntryPoint(RE::PerkEntryPoint::kModSpellCost, summoner, &nonreanimatedbonus, "VanillaCapped",
+                                     5, {akCastedMagic});
+
+
                 if (perkfactor >= 1.0f && (perkfactor + perkfactorcapped < 1.0f)) {
                 
                     perkfactor = 1.0f;
                 } else {
                     perkfactor += perkfactorcapped;
                 }
+                // char buffer[150];
+                //sprintf_s(buffer, "perkfactor: %f", perkfactor);
+                // RE::ConsoleLog::GetSingleton()->Print(buffer);
                 keywordmap["untyped"] = perkfactor;
                 for (auto& elements : mid) {
                     if (mid[j].activeEffect) {
                         indexarrayworking.push_back(j);
-                        indexarrayworkingfloat.push_back(mid[j].activeEffect->elapsedSeconds);
+                        indexarrayworkingfloat.push_back(mid[j].activeEffect->elapsedSeconds+0.01f);
+                        //char buffer1[150];
+                        //sprintf_s(buffer1, "elapsed second: %f", mid[j].activeEffect->elapsedSeconds);
+                        //RE::ConsoleLog::GetSingleton()->Print(buffer1);
                     }
                     j += 1;
                 }
@@ -98,22 +113,55 @@ struct Hooks {
                         indexarrayworking2.insert(indexarrayworking2.begin(), indexarrayworking[index]);
                         }
                         indexarrayworkingfloat[index] = 0.0f;
+                        //char buffer[150];
+                        //sprintf_s(buffer, "widx first: %i", widx);
+                        //RE::ConsoleLog::GetSingleton()->Print(buffer);
                 }
+                //float antiperkfactor = 0.0f;
+                //float antiperktotal = 0.0f;
                 for (std::uint32_t widx = 0; widx < indexarrayworking2.size(); ++widx) {
                         auto element = mid[indexarrayworking2[widx]];
+                        //mid.size();
                         accountedfor = 0;
+                        //char buffer[150];
+                        //sprintf_s(buffer, "widx second: %i", widx);
+                        //RE::ConsoleLog::GetSingleton()->Print(buffer);
+                        //char buffer1[150];
+                        //sprintf_s(buffer1, "indexarrayworking second: %i", indexarrayworking2[widx]);
+                        //RE::ConsoleLog::GetSingleton()->Print(buffer1);
+                        //antiperktotal = 0.0f;
+
                         for (std::uint32_t idx = 0; idx < element.activeEffect->effect->baseEffect->numKeywords;
                              ++idx) {
+                        //char buffer[150];
+                        //sprintf_s(buffer, "perkfactor2: %f", perkfactor);
+                        //RE::ConsoleLog::GetSingleton()->Print(
+                            //element.activeEffect->effect->baseEffect->keywords[idx]->formEditorID.c_str());
+
                             if (element.activeEffect->effect->baseEffect->keywords[idx]->formEditorID.contains(
                                     a_editorID)) {
                                 auto testkey =
                                     element.activeEffect->effect->baseEffect->keywords[idx]->formEditorID.c_str();
-                                if (!keywordmap.contains(testkey)) {
 
+                                //antiperkfactor = 0.0f;
+                                //RE::HandleEntryPoint(
+                                //    RE::PerkEntryPoint::kModSpellCost, summoner, &antiperkfactor,
+                                //    element.activeEffect->effect->baseEffect->keywords[idx]->formEditorID.c_str(), 4,
+                                //    {element.activeEffect->spell});
+                                //antiperktotal += antiperkfactor;
+                                if (!keywordmap.contains(testkey)) {
+                                    if (element.activeEffect->effect->baseEffect->keywords[idx]->formEditorID.contains(
+                                            "BaseOne")) {
+                                        perkfactor = 1.0f;
+                                    } else {
+                                        perkfactor = 0.0f;
+                                    }
                                         
-                                    perkfactor = 0.0f;
                                     RE::HandleEntryPoint(RE::PerkEntryPoint::kModSpellCost, summoner, &perkfactor, element.activeEffect->effect->baseEffect->keywords[idx]->formEditorID.c_str(), 3, {element.activeEffect->spell});
                                         keywordmap[testkey] = perkfactor;
+                                    //char buffer[150];
+                                    //sprintf_s(buffer, "perkfactor2: %f", perkfactor);
+                                    //RE::ConsoleLog::GetSingleton()->Print(element.activeEffect->effect->baseEffect->keywords[idx]->formEditorID.c_str());
                                 }
                                 if (keywordmap[testkey] >= 1.0f && accountedfor == 0) {
 
@@ -124,10 +172,42 @@ struct Hooks {
                             }
                         }
 
+
+
+
+
                         if (!element.activeEffect->effect->baseEffect->HasKeywordString("MagicSpecialConjuration")) {
+                            if (element.activeEffect->effect->baseEffect->HasArchetype(
+                                    RE::EffectArchetypes::ArchetypeID::kReanimate)) {
+                                if (reanimatedbonus > 0.0f && accountedfor == 0) {
+                                        reanimatedbonus -= 1.0f;
+                                        accountedfor = 1;
+                                        // RE::ConsoleLog::GetSingleton()->Print(
+                                        //     element.activeEffect->effect->baseEffect->keywords[0]->formEditorID.c_str());
+                                }
+                            }
+                            if (element.activeEffect->effect->baseEffect->HasArchetype(
+                                    RE::EffectArchetypes::ArchetypeID::kSummonCreature)) {
+                                if (nonreanimatedbonus > 0.0f && accountedfor == 0) {
+                                        nonreanimatedbonus -= 1.0f;
+                                        accountedfor = 1;
+                                        // RE::ConsoleLog::GetSingleton()->Print(
+                                        //     element.activeEffect->effect->baseEffect->keywords[0]->formEditorID.c_str());
+                                }
+                            }
                             if (keywordmap["untyped"] > 0.0f && accountedfor == 0) {
-                                keywordmap["untyped"] -= 1.0f;
-                                accountedfor = 1;
+                                if (keywordmap["untyped"]> 0.0f) {
+                                        keywordmap["untyped"] -= 1.0f;
+                                        //if (antiperktotal
+                                        //    >= 1.0f) 
+                                        //{ antiperktotal -= 1.0f; }
+                                        accountedfor = 1;                                
+                                
+                                }
+
+                                //RE::ConsoleLog::GetSingleton()->Print(
+                                //    element.activeEffect->effect->baseEffect->keywords[0]->formEditorID.c_str());
+
                             }
 
                         }
@@ -135,6 +215,9 @@ struct Hooks {
                         if (accountedfor == 0) {
                             indexarray.push_back(indexarrayworking2[widx]);
                             if (widx == 0) n = 0;
+                            //RE::ConsoleLog::GetSingleton()->Print(
+                            //    element.activeEffect->effect->baseEffect->keywords[0]->formEditorID.c_str());
+
                         }
 
                 }
